@@ -1,4 +1,3 @@
-# Gestão Comercial
 
 SPA em React + Vite com três módulos: Comissões, Estoque e Juros.
 
