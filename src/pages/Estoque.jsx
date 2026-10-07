@@ -46,7 +46,7 @@ export default function Estoque() {
   const [tipo, setTipo] = useState('saida')
   const [quantidade, setQuantidade] = useState(0)
   const [descricao, setDescricao] = useState('')
-  const [estoqueFinal, setEstoqueFinal] = useState(null)
+  const [estoqueFinal, setEstoqueFinal] = useState(null)  
   const [produtos, setProdutos] = useState(() => {
     const estoqueSalvo = localStorage.getItem('estoque-produtos')
 
@@ -68,6 +68,7 @@ export default function Estoque() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    const novoId = `MOV-${String(historico.length + 1).padStart(4, '0')}`
 
     console.log('Produto:', produto)
     console.log('Tipo:', tipo)
@@ -101,9 +102,9 @@ export default function Estoque() {
       'estoque-produtos',
       JSON.stringify(produtosAtualizados)
     )
-    const novoId = `MOV-${Date.now()}`
+    
     const historicoAtualizado = [
-      
+
       {
         id: novoId,
         produto: produtoSelecionado.descricao,
@@ -118,7 +119,8 @@ export default function Estoque() {
 
     localStorage.setItem(
       'estoque-historico',
-      JSON.stringify(historicoAtualizado)
+      JSON.stringify(historicoAtualizado),
+      setIdMovimentacao(`MOV-${Date.now()}`)
     )
   }
 
@@ -144,13 +146,7 @@ export default function Estoque() {
           description="Informe os dados da entrada ou saída."
         >
           <form className="form" onSubmit={handleSubmit}>
-            <Field
-              id="mov-id"
-              label="Identificador"
-              hint="Número único, gerado automaticamente."
-            >
-              <input id="mov-id" value="MOV-0003" readOnly />
-            </Field>
+            
 
             <Field id="mov-produto" label="Produto">
               <select
@@ -166,7 +162,7 @@ export default function Estoque() {
               </select>
             </Field>
 
-            <div className="form__row">
+            <div className="form__row estoque-form-row">
               <Field id="mov-tipo" label="Tipo">
                 <select
                   id="mov-tipo"
