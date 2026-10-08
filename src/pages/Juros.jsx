@@ -3,7 +3,6 @@ import Card from '../components/ui/Card.jsx'
 import Badge from '../components/ui/Badge.jsx'
 import Button from '../components/ui/Button.jsx'
 import Field from '../components/ui/Field.jsx'
-import { resultadoJuros } from '../data/mocks.js'
 import { calcularJuros } from '../services/jurosServices.js'
 import { useState } from 'react'
 
@@ -51,7 +50,16 @@ export default function Juros() {
           </form>
         </Card>
 
-        <Card title="Resultado" aria-label="Resultado do cálculo" actions={<Badge variant="warning">Em atraso</Badge>}>
+        <Card
+          title="Resultado"
+          aria-label="Resultado do cálculo"
+          actions={
+            resultado && resultado.diasAtraso > 0 ? (
+              <Badge variant="warning">Em atraso</Badge>
+            ) : null
+          }
+        >
+
           <div className="highlight-result">
             <div className="k">Valor atualizado</div>
             <div className="v v--large">
