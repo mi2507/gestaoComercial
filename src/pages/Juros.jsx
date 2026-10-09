@@ -6,8 +6,6 @@ import Field from '../components/ui/Field.jsx'
 import { calcularJuros } from '../services/jurosServices.js'
 import { useState } from 'react'
 
-
-
 export default function Juros() {
   const [valor, setValor] = useState('')
   const [dataVencimento, setDataVencimento] = useState('')
