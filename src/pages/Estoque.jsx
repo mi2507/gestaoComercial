@@ -19,7 +19,9 @@ const colunasEstoque = [
     render: (p) => (
       <>
         <strong>{p.estoque}</strong>{' '}
-        {p.atualizado && <Badge variant="success">Atualizado</Badge>}
+        {p.atualizado && (
+          <Badge variant="success">Atualizado</Badge>
+        )}
       </>
     ),
   },
@@ -46,34 +48,30 @@ export default function Estoque() {
   const [tipo, setTipo] = useState('saida')
   const [quantidade, setQuantidade] = useState(0)
   const [descricao, setDescricao] = useState('')
-  const [estoqueFinal, setEstoqueFinal] = useState(null)  
+  const [estoqueFinal, setEstoqueFinal] = useState(null)
+
   const [produtos, setProdutos] = useState(() => {
     const estoqueSalvo = localStorage.getItem('estoque-produtos')
-
-    if (estoqueSalvo) {
-      return JSON.parse(estoqueSalvo)
-    }
-
-    return produtosExibidos
+    return estoqueSalvo ? JSON.parse(estoqueSalvo) : produtosExibidos
   })
+
   const [historico, setHistorico] = useState(() => {
     const historicoSalvo = localStorage.getItem('estoque-historico')
-
-    if (historicoSalvo) {
-      return JSON.parse(historicoSalvo)
-    }
-
-    return historicoExibido
+    return historicoSalvo ? JSON.parse(historicoSalvo) : historicoExibido
   })
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    const novoId = `MOV-${String(historico.length + 1).padStart(4, '0')}`
 
-    console.log('Produto:', produto)
-    console.log('Tipo:', tipo)
-    console.log('Quantidade:', quantidade)
-    console.log('Descrição:', descricao)
+    if (!Number.isInteger(quantidade) || quantidade <= 0) {
+      alert('Informe uma quantidade maior que zero.')
+      return
+    }
+
+    if (!descricao.trim()) {
+      alert('Informe a descrição da movimentação.')
+      return
+    }
 
     const produtoSelecionado = produtos.find(
       (item) => item.codigo === Number(produto)
@@ -83,13 +81,16 @@ export default function Estoque() {
       return
     }
 
+    if (tipo === 'saida' && quantidade > produtoSelecionado.estoque) {
+      alert('A quantidade de saída não pode ser maior que o estoque disponível.')
+      return
+    }
+
     const novoEstoque = movimentarEstoque(
       produtoSelecionado.estoque,
       tipo,
       quantidade
     )
-
-    setEstoqueFinal(novoEstoque)
 
     const produtosAtualizados = produtos.map((item) =>
       item.codigo === Number(produto)
@@ -97,31 +98,40 @@ export default function Estoque() {
         : item
     )
 
-    setProdutos(produtosAtualizados)
-    localStorage.setItem(
-      'estoque-produtos',
-      JSON.stringify(produtosAtualizados)
-    )
-    
-    const historicoAtualizado = [
+    const maiorNumeroId = historico.reduce((maior, movimento) => {
+      const numero = Number(movimento.id?.replace('MOV-', '')) || 0
+      return Math.max(maior, numero)
+    }, 0)
 
+    const novoId = `MOV-${String(maiorNumeroId + 1).padStart(4, '0')}`
+
+    const historicoAtualizado = [
       {
         id: novoId,
         produto: produtoSelecionado.descricao,
         tipo: tipo === 'entrada' ? 'Entrada' : 'Saída',
-        quantidade: quantidade,
-        descricao: descricao,
+        quantidade,
+        descricao: descricao.trim(),
       },
       ...historico,
     ]
 
+    setEstoqueFinal(novoEstoque)
+    setProdutos(produtosAtualizados)
     setHistorico(historicoAtualizado)
 
     localStorage.setItem(
-      'estoque-historico',
-      JSON.stringify(historicoAtualizado),
-      setIdMovimentacao(`MOV-${Date.now()}`)
+      'estoque-produtos',
+      JSON.stringify(produtosAtualizados)
     )
+
+    localStorage.setItem(
+      'estoque-historico',
+      JSON.stringify(historicoAtualizado)
+    )
+
+    setDescricao('')
+    setQuantidade(0)
   }
 
   return (
@@ -146,8 +156,6 @@ export default function Estoque() {
           description="Informe os dados da entrada ou saída."
         >
           <form className="form" onSubmit={handleSubmit}>
-            
-
             <Field id="mov-produto" label="Produto">
               <select
                 id="mov-produto"
@@ -178,6 +186,8 @@ export default function Estoque() {
                 <input
                   id="mov-qtd"
                   type="number"
+                  min="1"
+                  step="1"
                   value={quantidade}
                   onChange={(event) =>
                     setQuantidade(Number(event.target.value))
@@ -201,9 +211,9 @@ export default function Estoque() {
 
             <Button type="submit">Registrar movimentação</Button>
 
-            <Alert>
-              Estoque final: {estoqueFinal}
-            </Alert>
+            {estoqueFinal !== null && (
+              <Alert>Estoque final: {estoqueFinal}</Alert>
+            )}
           </form>
         </Card>
       </div>

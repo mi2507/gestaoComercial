@@ -12,16 +12,19 @@ export default function Juros() {
   const [valor, setValor] = useState('')
   const [dataVencimento, setDataVencimento] = useState('')
   const [resultado, setResultado] = useState(null)
-  const handleSubmit = (event) => {
-    event.preventDefault()
+  
+const handleSubmit = (event) => {
+  event.preventDefault()
 
-    const resultado = calcularJuros(valor, dataVencimento)
-    console.log('valor:', valor)
-    console.log('data:', dataVencimento)
-    console.log('resultado:', resultado)
-    setResultado(resultado)
-
+  if (!valor.trim() || !dataVencimento) {
+    setResultado(null)
+    return
   }
+
+  const resultado = calcularJuros(valor, dataVencimento)
+  setResultado(resultado)
+}
+
 
   return (
     <>
